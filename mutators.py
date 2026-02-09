@@ -2,7 +2,7 @@ import random
 import miditoolkit
 import numpy as np
 
-def mutate(individual, add_note_rate, remove_note_rate, change_pitch_rate, change_duration_rate, change_start_rate, duration_range, length):
+def mutate(individual, add_note_rate, remove_note_rate, split_note_rate, change_pitch_rate, change_duration_rate, change_start_rate, duration_range, length):
     new_individual = []
 
     for note in individual:
@@ -28,7 +28,7 @@ def mutate(individual, add_note_rate, remove_note_rate, change_pitch_rate, chang
         start=np.random.randint(0, length-duration)
         new_note = miditoolkit.Note(
             velocity=int(np.random.normal(64, 10)),
-            pitch=random.randint(21, 108),
+            pitch=random.randint(60, 80),
             start=start, # Random start time, can be adjusted as needed
             end=start+duration
         )
@@ -36,5 +36,15 @@ def mutate(individual, add_note_rate, remove_note_rate, change_pitch_rate, chang
         
     if random.random() < remove_note_rate and len(new_individual) > 1:
         new_individual.pop(random.randint(0, len(new_individual) - 1))
+
+    if random.random() < split_note_rate and len(new_individual) > 0:
+        note_to_split = random.choice(new_individual)
+        new_individual.remove(note_to_split)
+        split_point = note_to_split.start + note_to_split.duration // 2
+        first_half = miditoolkit.Note(note_to_split.velocity, note_to_split.pitch, note_to_split.start, split_point - note_to_split.duration // 5)
+        second_half = miditoolkit.Note(note_to_split.velocity, note_to_split.pitch, split_point + note_to_split.duration // 5, note_to_split.end)
+        new_individual.extend([first_half, second_half])
     
+    new_individual.sort(key=lambda x: (x.start, x.duration))  # Ensure notes are sorted by start time
+
     return new_individual

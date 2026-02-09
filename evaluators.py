@@ -19,5 +19,6 @@ def evaluate_individual(individual, target_pr, pitch_range):
                 fitness += 100 # Penalize missing notes heavily
             else:
                 fitness += (int((target_pr[i, j] - ind_pr[i, j])) ** 2) / 100 # Penalize differences in velocity
+            # fitness += 1 if target_pr[i, j] != ind_pr[i, j] else 0
 
     return fitness
